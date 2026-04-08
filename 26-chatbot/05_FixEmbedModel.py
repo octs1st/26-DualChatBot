@@ -4,6 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.embeddings import Embeddings
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from typing import List
 
 class MyEmbeddings(Embeddings):
     def __init__ (self, base_url, api_key='lm-studio'):
@@ -18,31 +19,35 @@ class MyEmbeddings(Embeddings):
     
 
 client = OpenAI(base_url="http://127.0.0.1:1234/v1", 
-                api_key="lm-studio",
-                model="llama-3-korean-bllossom-8b",
-                temperature=0.7
+                api_key="lm-studio"
                 )
 embeddings = MyEmbeddings(base_url="http://127.0.0.1:1234/v1")  
 
 completion = client.chat.completions.create(
-  messages=[
-    {"role": "system", "content": "¹®Àå ³¡³¯ ¶§ ÀÌ¸ğÆ¼ÄÜÀ» ½áÁà"},
-    {"role": "user", "content": "±³³» ±İÁö ´ë»ó ÇÁ·Î±×·¥ÀÌ ¹¹¾ß"}
+    model="llama-3-korean-bllossom-8b",
+    temperature=0.7,
+    messages=[
+        {"role": "system", "content": "ë¬¸ì¥ ëë‚  ë•Œ ì´ëª¨í‹°ì½˜ì„ ì¨ì¤˜"},
+        {"role": "user", "content": "êµë‚´ ê¸ˆì§€ ëŒ€ìƒ í”„ë¡œê·¸ë¨ì´ ë­ì•¼"}
   ],
 )
 
-file_path = r"C:\Users\rocom\OneDrive\¹®¼­\26-1\26-DualChatBot\reference\p2p.txt"
-loader = TextLoader(file_path,encoding='utf-8')
-data = loader.load()
-
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=20,
                                                separators=["\n\n", "\n", "(?<=\. )", " ", ""], length_function=len)
-splits = text_splitter.split_documents(data)
 
-emb_vectors = embeddings.embed_documents([
-    "¾È³çÇÏ¼¼¿ä.",
-    'ÀßºÎÅ¹ÇÕ´Ï´Ù.',
-    'ÇÁ·ÎÁ§Æ®¸¦ÇÏÀÚ.'
-]) 
+
+def embed_file(file):
+    with open('./files/p2p.txt') as f:
+        f.write(file.read())
+    Loader = {'txt':TextLoader, 'pdf':PyPDFLoader}[file.name.split('.')[-1].lower()]
+    docs = Loader('./files/p2p.txt').load_and_split(text_splitter=text_splitter)
+    splits = text_splitter.split_documents(docs)
+    vector_store = Chroma.from_documents(
+        documents = docs,
+        embedding = embeddings,
+        persist_directory = './VectorDB',)
+    retriever = vector_store.as_retriever()
+    return retriever
+        
 
 print(completion.choices[0].message.content)
