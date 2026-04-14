@@ -41,7 +41,7 @@ def embed_file(path):
     return retriever
 retriever = embed_file(file_path)
 
-query = "학칙 1장 1조는?"
+query = "동서대학교의 학생대표 자격은 어떻게 돼?"
 rel_docs = retriever.invoke(query)
 context = "\n".join([doc.page_content for doc in rel_docs])
 
@@ -49,10 +49,9 @@ completion = client.chat.completions.create(
     model="llama-3-korean-bllossom-8b",
     temperature=0.7,
     messages=[
-        {"role": "system", "content": f"학생들이 이해하기 쉽게 친절하게 설명해줘. 지식은 내가 준 문서에서만 가져와. 문장 끝날 때 이모티콘을 써줘,{context}"},
+        {"role": "system", "content": f"학생들이 이해하기 쉽게 친절하게 설명해줘. 지식은 내가 준 pdf에서만 가져와,{context}"},
         {"role": "user", "content": query}
   ],
 )
-        
 
 print(completion.choices[0].message.content)
