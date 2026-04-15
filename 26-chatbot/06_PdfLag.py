@@ -10,7 +10,7 @@ from typing import List
 class MyEmbeddings(Embeddings):
     def __init__ (self, base_url, api_key='lm-studio'):
         self.client = OpenAI(base_url=base_url, api_key=api_key)
-    def embed_documents(self, texts: List[str], model='text-embedding-nomic-embed-text-v1.5') -> List[List[float]]:
+    def embed_documents(self, texts: List[str], model='bge-m3') -> List[List[float]]:
         texts = list(map(lambda text:text.replace("\n", ' '), texts))
         datas = self.client.embeddings.create(input=texts, model=model).data
         return list(map(lambda data:data.embedding, datas))
@@ -46,7 +46,7 @@ rel_docs = retriever.invoke(query)
 context = "\n".join([doc.page_content for doc in rel_docs])
 
 completion = client.chat.completions.create(
-    model="llama-3-korean-bllossom-8b",
+    model="llama-3.2-Korean-Bllossom-3B",
     temperature=0.7,
     messages=[
         {"role": "system", "content": f"학생들이 이해하기 쉽게 친절하게 설명해줘. 지식은 내가 준 pdf에서만 가져와,{context}"},
