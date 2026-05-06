@@ -1,5 +1,5 @@
 from openai import OpenAI
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.embeddings import Embeddings
@@ -27,8 +27,8 @@ completion = client.chat.completions.create(
     model="llama-3-korean-bllossom-8b",
     temperature=0.7,
     messages=[
-        {"role": "system", "content": "ë¬¸ì¥ ëë‚  ë•Œ ì´ëª¨í‹°ì½˜ì„ ì¨ì¤˜"},
-        {"role": "user", "content": "êµë‚´ ê¸ˆì§€ ëŒ€ìƒ í”„ë¡œê·¸ë¨ì´ ë­ì•¼"}
+        {"role": "system", "content": "ë¬¸ì¥ ??‚  ?•Œ ?´ëª¨í‹°ì½˜ì„ ?¨ì¤?"},
+        {"role": "user", "content": "êµë‚´ ê¸ˆì?? ????ƒ ?”„ë¡œê·¸?¨?´ ë­ì•¼"}
   ],
 )
 

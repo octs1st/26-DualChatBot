@@ -14,3 +14,4 @@ print(f"Vocabulary Size: {config.vocab_size}")
 print(f"{dimension}")
 
 #이전에는 nomic 임베딩 모델 사용했지만 차원이 많이 차이나서 변경
+# 차원 테스트 코드

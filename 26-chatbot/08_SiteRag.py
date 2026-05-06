@@ -1,6 +1,7 @@
+from langchain_community.document_loaders import UnstructuredURLLoader
+import nltk
+
 from openai import OpenAI
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_core.embeddings import Embeddings
@@ -17,9 +18,14 @@ class MyEmbeddings(Embeddings):
     
     def embed_query(self, text: str) -> List[float]:
         return self.embed_documents([text])[0]
-    
 
-file_path = './files/bylaws.pdf'
+# nltk.download('punkt')
+# nltk.download('averaged_perceptron_tagger')
+# 첫 회에만 다운로드
+
+urls = [ "https://ko.wikipedia.org/wiki/%EB%8F%84%EC%BF%84_%EB%94%94%EC%A6%88%EB%8B%88%EC%94%A8" ]
+# url 선택 주의 -> 네이버 블로그 무한로딩
+
 client = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="lm-studio")
 embeddings = MyEmbeddings(base_url="http://127.0.0.1:1234/v1")  
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=200, 
@@ -28,9 +34,8 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=200,
                                                length_function=len)
 
 def embed_file(path):
-    ext = path.split('.')[-1].lower()
-    Loader = {'txt':TextLoader, 'pdf':PyPDFLoader}[ext]
-    loader = Loader(path)
+    #ext = path.split('.')[-1].lower()
+    loader = UnstructuredURLLoader(urls=urls)
     docs = loader.load_and_split(text_splitter=text_splitter)
     
     vector_store = Chroma.from_documents(
@@ -39,9 +44,10 @@ def embed_file(path):
         persist_directory = './VectorDB',)
     retriever = vector_store.as_retriever()
     return retriever
-retriever = embed_file(file_path)
+retriever = embed_file(urls)
 
-query = "동서대학교의 학생대표 자격은 어떻게 돼?"
+
+query = "도쿄 디즈니씨에는 어떤 음식 가격은?"
 rel_docs = retriever.invoke(query)
 context = "\n".join([doc.page_content for doc in rel_docs])
 
@@ -49,9 +55,12 @@ completion = client.chat.completions.create(
     model="llama-3.2-Korean-Bllossom-3B",
     temperature=0.7,
     messages=[
-        {"role": "system", "content": f"학생들이 이해하기 쉽게 친절하게 설명해줘. 지식은 내가 준 pdf에서만 가져와,{context}"},
+        {"role": "system", "content": f"학생들이 이해하기 쉽게 친절하게 설명해줘. 지식은 내가 준 url에서만 가져와 무조건 한국어로만 사용해. 그리고 간략하게 주요 내용만 대답해줘.,{context}"},
         {"role": "user", "content": query}
   ],
 )
 
-print(completion.choices[0].message.content)
+print(context)
+# print(completion.choices[0].message.context)
+
+# 위키피디아 url 변경 또는 환경 재설정(5/6)
