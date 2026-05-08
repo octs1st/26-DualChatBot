@@ -23,7 +23,7 @@ class MyEmbeddings(Embeddings):
 # nltk.download('averaged_perceptron_tagger')
 # 첫 회에만 다운로드
 
-urls = [ "https://ko.wikipedia.org/wiki/%EB%8F%84%EC%BF%84_%EB%94%94%EC%A6%88%EB%8B%88%EC%94%A8" ]
+urls = [ "https://uni.dongseo.ac.kr/sw/index.php?pCode=MN1000093" ]
 # url 선택 주의 -> 네이버 블로그 무한로딩
 
 client = OpenAI(base_url="http://127.0.0.1:1234/v1", api_key="lm-studio")
